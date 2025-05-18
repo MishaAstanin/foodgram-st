@@ -1,15 +1,14 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 
-from .views import IngredientViewSet, RecipeViewSet, UserViewSet
+from .views import IngredientViewSet, RecipeViewSet, CustomUserViewSet
 
 router = DefaultRouter()
 router.register(r'ingredients', IngredientViewSet)
-router.register(r'users', UserViewSet)
 router.register(r'recipes', RecipeViewSet)
+router.register(r'users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
+    path('auth/', include('djoser.urls.authtoken')),
 ]

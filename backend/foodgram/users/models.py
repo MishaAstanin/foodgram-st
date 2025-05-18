@@ -10,6 +10,8 @@ class FoodgramUser(AbstractUser):
                                 RegexValidator(r'^[\w.@+-]+\Z')], verbose_name='Имя пользователя')
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
+    avatar = models.ImageField(
+        upload_to='users_images', blank=True, null=True, verbose_name='Аватар')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'password']
