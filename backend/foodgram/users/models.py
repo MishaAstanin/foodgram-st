@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 
-
 class FoodgramUser(AbstractUser):
     email = models.EmailField(
         max_length=254, unique=True, verbose_name='Адрес электронной почты')
