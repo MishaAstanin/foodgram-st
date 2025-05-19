@@ -2,10 +2,14 @@ from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.core.files.base import ContentFile
 import base64
+from django.contrib.auth import get_user_model
+from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient
-from users.models import FoodgramUser
+from users.models import FoodgramUser, Follow
 
+
+User = get_user_model()
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -112,3 +116,31 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return RecipeOutputSerializer(instance, context=self.context).data
+
+class FollowSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        slug_field='username', read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
+    following = serializers.SlugRelatedField(
+        slug_field='username', queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'following',)
+        read_only_fields = ('user',)
+
+    validators = [
+        UniqueTogetherValidator(
+            queryset=Follow.objects.all(),
+            fields=('user', 'following')
+        )
+    ]
+
+    def validate_following(self, value):
+        user = self.context['request'].user
+        if user == value:
+            raise serializers.ValidationError(
+                "Нельзя подписаться на самого себя")
+        return value

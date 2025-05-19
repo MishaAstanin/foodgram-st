@@ -7,11 +7,14 @@ from rest_framework import status
 from rest_framework.decorators import action
 from django.core.files.base import ContentFile
 import base64
-
+from django.contrib.auth import get_user_model
 
 from recipes.models import Ingredient, Recipe
-from .serializers import IngredientSerializer, RecipeSerializer, CustomUserSerializer, RecipeOutputSerializer
+from users.models import Follow
+from .serializers import IngredientSerializer, RecipeSerializer, CustomUserSerializer, RecipeOutputSerializer, FollowSerializer
 from .permissions import AuthorOrReadOnly
+
+User = get_user_model()
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -69,6 +72,32 @@ class CustomUserViewSet(UserViewSet):
 
         elif request.method == 'DELETE':
             user.avatar.delete(save=True)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
+    def subscribe(self, request, id=None):
+        user = request.user
+        try:
+            following = User.objects.get(pk=id)
+        except User.DoesNotExist:
+            return Response({'error': 'Пользователя не существует'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'POST':
+            if user == following:
+                return Response({'error': 'Нельзя подписаться на самого себя'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if Follow.objects.filter(user=user, following=following).exists():
+                return Response({'error': 'Повторная подписка невозможна'}, status=status.HTTP_400_BAD_REQUEST)
+            follow = Follow.objects.create(user=user, following=following)
+            serializer = FollowSerializer(follow, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        elif request.method == 'DELETE':
+            follow = Follow.objects.filter(
+                user=user, following=following).first()
+            if not follow:
+                return Response({'error': 'Подписки не существует'}, status=status.HTTP_400_BAD_REQUEST)
+            follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
