@@ -11,6 +11,7 @@ import base64
 
 from recipes.models import Ingredient, Recipe
 from .serializers import IngredientSerializer, RecipeSerializer, CustomUserSerializer, RecipeOutputSerializer
+from .permissions import AuthorOrReadOnly
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,6 +23,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
+    permission_classes = (AuthorOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):

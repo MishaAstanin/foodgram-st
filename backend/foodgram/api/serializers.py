@@ -91,5 +91,24 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return recipe
 
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop('ingredients')
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if ingredients is not None:
+            RecipeIngredient.objects.filter(recipe=instance).delete()
+
+            for ingredient in ingredients:
+                RecipeIngredient.objects.create(
+                    recipe=instance,
+                    ingredient=ingredient['id'],
+                    amount=ingredient['amount']
+                )
+
+        return instance
+
     def to_representation(self, instance):
         return RecipeOutputSerializer(instance, context=self.context).data

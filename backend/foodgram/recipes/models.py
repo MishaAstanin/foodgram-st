@@ -75,3 +75,51 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.ingredient.name}: {self.amount} {self.ingredient.measurement_unit}"
+
+
+class ShoppingList(models.Model):
+    """Список покупок."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='shopping_list'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='in_shopping_list'
+    )
+
+    class Meta:
+        verbose_name = 'список покупок'
+        verbose_name_plural = 'Список покупок'
+
+    def __str__(self):
+        return f"{self.user.get_username()} - {self.recipe.name}"
+
+
+class Featured(models.Model):
+    """Избранное."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='featured'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='in_featured'
+    )
+
+    class Meta:
+        verbose_name = 'избранное'
+        verbose_name_plural = 'Избранное'
+
+    def __str__(self):
+        return f"{self.user.get_username()} - {self.recipe.name}"

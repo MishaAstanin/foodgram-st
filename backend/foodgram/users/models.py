@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 
+
 class FoodgramUser(AbstractUser):
     email = models.EmailField(
         max_length=254, unique=True, verbose_name='Адрес электронной почты')
@@ -18,3 +19,25 @@ class FoodgramUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Follow(models.Model):
+    # кто подписан
+    user = models.ForeignKey(
+        FoodgramUser,
+        on_delete=models.CASCADE,
+        related_name='follower'
+    )
+    # на кого подписан
+    following = models.ForeignKey(
+        FoodgramUser,
+        on_delete=models.CASCADE,
+        related_name='following'
+    )
+
+    class Meta:
+        verbose_name = 'подписка'
+        verbose_name_plural = 'Подписка'
+
+    def __str__(self):
+        return f"{self.user.get_username()} - {self.following.get_username()}"
