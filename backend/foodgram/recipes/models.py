@@ -30,7 +30,8 @@ class Recipe(models.Model):
         verbose_name='Автор публикации',
         related_name='recipes'
     )
-    name = models.CharField(max_length=256, verbose_name='Название')
+    name = models.CharField(max_length=256, verbose_name='Название',
+                            help_text='Название, не более 256 символов')
     image = models.ImageField(
         upload_to='recipes_images', verbose_name='Изображение')
     text = models.TextField(verbose_name='Текстовое описание')
@@ -41,7 +42,8 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления (в минутах)',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(1)],
+        help_text='Время приготовления (в минутах), не менее 1'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата и время публикации')
@@ -49,6 +51,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return f"{self.name} - {self.author.get_username()}"
@@ -74,7 +77,7 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Связи рецепта и ингредиента'
 
     def __str__(self):
-        return f"{self.ingredient.name}: {self.amount} {self.ingredient.measurement_unit}"
+        return f"{self.recipe.name} - {self.ingredient.name}: {self.amount} {self.ingredient.measurement_unit}"
 
 
 class ShoppingList(models.Model):
