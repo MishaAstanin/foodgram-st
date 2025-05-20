@@ -52,6 +52,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('author',)
 
+    def handle_post_delete(self, request, pk, model, error_msg_exists):
+        user = request.user
+        try:
+            recipe = Recipe.objects.get(pk=pk)
+        except Recipe.DoesNotExist:
+            return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'POST':
+            if model.objects.filter(user=user, recipe=recipe).exists():
+                return Response({'detail': error_msg_exists}, status=status.HTTP_400_BAD_REQUEST)
+            model.objects.create(user=user, recipe=recipe)
+            serializer = ShortRecipeOutputSerializer(
+                recipe, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        elif request.method == 'DELETE':
+            obj = model.objects.filter(user=user, recipe=recipe).first()
+            if not obj:
+                return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_400_BAD_REQUEST)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
@@ -82,53 +104,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'], url_path='favorite')
     def favorite(self, request, pk=None):
-        user = request.user
-        try:
-            recipe = Recipe.objects.get(pk=pk)
-        except Recipe.DoesNotExist:
-            return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_404_NOT_FOUND)
-
-        if request.method == 'POST':
-
-            if Featured.objects.filter(user=user, recipe=recipe).exists():
-                return Response({'detail': 'Повторное добавление невозможно.'}, status=status.HTTP_400_BAD_REQUEST)
-            featured = Featured.objects.create(user=user, recipe=recipe)
-            serializer = ShortRecipeOutputSerializer(
-                recipe, context={'request': request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        elif request.method == 'DELETE':
-            featured = Featured.objects.filter(
-                user=user, recipe=recipe).first()
-            if not featured:
-                return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_400_BAD_REQUEST)
-            featured.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.handle_post_delete(
+            request, pk, Featured,
+            error_msg_exists='Повторное добавление невозможно.'
+        )
 
     @action(detail=True, methods=['post', 'delete'], url_path='shopping_cart')
     def shopping_cart(self, request, pk=None):
-        user = request.user
-        try:
-            recipe = Recipe.objects.get(pk=pk)
-        except Recipe.DoesNotExist:
-            return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_404_NOT_FOUND)
-
-        if request.method == 'POST':
-
-            if ShoppingList.objects.filter(user=user, recipe=recipe).exists():
-                return Response({'detail': 'Повторное добавление невозможно.'}, status=status.HTTP_400_BAD_REQUEST)
-            list_item = ShoppingList.objects.create(user=user, recipe=recipe)
-            serializer = ShortRecipeOutputSerializer(
-                recipe, context={'request': request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        elif request.method == 'DELETE':
-            list_item = ShoppingList.objects.filter(
-                user=user, recipe=recipe).first()
-            if not list_item:
-                return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_400_BAD_REQUEST)
-            list_item.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.handle_post_delete(
+            request, pk, ShoppingList,
+            error_msg_exists='Повторное добавление невозможно.'
+        )
 
     @action(
         detail=False, methods=['get'], url_path='download_shopping_cart',
