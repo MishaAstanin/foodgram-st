@@ -1,22 +1,34 @@
-from django.shortcuts import render
-from rest_framework import viewsets, filters
-from rest_framework import viewsets, permissions
-from djoser.views import UserViewSet
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import action
-from django.core.files.base import ContentFile
 import base64
+
 from django.contrib.auth import get_user_model
-from djoser.serializers import SetPasswordSerializer
-from rest_framework.pagination import LimitOffsetPagination
+from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from django.urls import reverse
-from recipes.models import Ingredient, Recipe, Featured, ShoppingList, RecipeIngredient
-from users.models import Follow
-from .serializers import IngredientSerializer, RecipeSerializer, CustomUserSerializer, RecipeOutputSerializer, ShortRecipeOutputSerializer, ShortUserSerializer, VeryShortUserSerializer
-from .permissions import AuthorOrReadOnly
+
 from django_filters.rest_framework import DjangoFilterBackend
+
+from djoser.serializers import SetPasswordSerializer
+from djoser.views import UserViewSet
+
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+
+from recipes.models import Featured, Ingredient, Recipe, RecipeIngredient, ShoppingList
+from users.models import Follow
+
+from .permissions import AuthorOrReadOnly
+from .serializers import (
+    BaseUserSerializer,
+    ShortUserSerializer,
+    CustomUserSerializer,
+    IngredientSerializer,
+    RecipeOutputSerializer,
+    RecipeSerializer,
+    ShortRecipeOutputSerializer,
+)
+
 
 User = get_user_model()
 
@@ -51,7 +63,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             elif is_favorited == '0':
                 queryset = queryset.exclude(in_featured__user=user)
 
-        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart')
         if is_in_shopping_cart is not None and user.is_authenticated:
             if is_in_shopping_cart == '1':
                 queryset = queryset.filter(in_shopping_list__user=user)
@@ -118,9 +131,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        detail=False,
-        methods=['get'],
-        url_path='download_shopping_cart',
+        detail=False, methods=['get'], url_path='download_shopping_cart',
         permission_classes=[permissions.IsAuthenticated]
     )
     def download_shopping_cart(self, request):
@@ -168,7 +179,7 @@ class CustomUserViewSet(UserViewSet):
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         user = self.get_queryset().get(id=response.data['id'])
-        serializer = VeryShortUserSerializer(
+        serializer = BaseUserSerializer(
             user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -235,12 +246,10 @@ class CustomUserViewSet(UserViewSet):
             following__user=user
         )
 
-        # Пагинация
         paginator = LimitOffsetPagination()
         paginated_users = paginator.paginate_queryset(
             followed_users, request, view=self)
 
-        # Сериализация
         serializer = CustomUserSerializer(
             paginated_users, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)

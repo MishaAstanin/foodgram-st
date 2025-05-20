@@ -1,6 +1,6 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
+from django.db import models
 
 
 User = get_user_model()
@@ -70,8 +70,8 @@ class RecipeIngredient(models.Model):
     amount = models.IntegerField(verbose_name='Количество')
 
     class Meta:
-        verbose_name = 'количество'
-        verbose_name_plural = 'Количество'
+        verbose_name = 'связь рецепта и ингредиента'
+        verbose_name_plural = 'Связи рецепта и ингредиента'
 
     def __str__(self):
         return f"{self.ingredient.name}: {self.amount} {self.ingredient.measurement_unit}"
@@ -95,7 +95,7 @@ class ShoppingList(models.Model):
 
     class Meta:
         verbose_name = 'список покупок'
-        verbose_name_plural = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
 
     def __str__(self):
         return f"{self.user.get_username()} - {self.recipe.name}"

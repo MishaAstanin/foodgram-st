@@ -17,6 +17,8 @@ class FoodgramUser(AbstractUser):
     REQUIRED_FIELDS = ['username', 'password']
 
     class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'Пользователи'
         ordering = ['id']
 
     def __str__(self):
@@ -24,13 +26,13 @@ class FoodgramUser(AbstractUser):
 
 
 class Follow(models.Model):
-    # кто подписан
+    # Кто подписан.
     user = models.ForeignKey(
         FoodgramUser,
         on_delete=models.CASCADE,
         related_name='follower'
     )
-    # на кого подписан
+    # На кого подписан.
     following = models.ForeignKey(
         FoodgramUser,
         on_delete=models.CASCADE,
@@ -39,7 +41,7 @@ class Follow(models.Model):
 
     class Meta:
         verbose_name = 'подписка'
-        verbose_name_plural = 'Подписка'
+        verbose_name_plural = 'Подписки'
 
     def __str__(self):
         return f"{self.user.get_username()} - {self.following.get_username()}"
