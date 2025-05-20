@@ -9,8 +9,10 @@ from django.core.files.base import ContentFile
 import base64
 from django.contrib.auth import get_user_model
 from djoser.serializers import SetPasswordSerializer
-
-from recipes.models import Ingredient, Recipe, Featured, ShoppingList
+from rest_framework.pagination import LimitOffsetPagination
+from django.http import HttpResponse
+from django.urls import reverse
+from recipes.models import Ingredient, Recipe, Featured, ShoppingList, RecipeIngredient
 from users.models import Follow
 from .serializers import IngredientSerializer, RecipeSerializer, CustomUserSerializer, RecipeOutputSerializer, ShortRecipeOutputSerializer, ShortUserSerializer, VeryShortUserSerializer
 from .permissions import AuthorOrReadOnly
@@ -24,6 +26,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
     permission_classes = (permissions.AllowAny,)
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -88,8 +91,53 @@ class RecipeViewSet(viewsets.ModelViewSet):
             list_item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='download_shopping_cart',
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def download_shopping_cart(self, request):
+        user = request.user
+
+        recipes = Recipe.objects.filter(in_shopping_list__user=user)
+
+        ingredients = {}
+        recipe_ingredients = RecipeIngredient.objects.filter(
+            recipe__in=recipes)
+        for item in recipe_ingredients:
+            name = item.ingredient.name
+            measurement_unit = item.ingredient.measurement_unit
+            key = (name, measurement_unit)
+            if key in ingredients:
+                ingredients[key] += item.amount
+            else:
+                ingredients[key] = item.amount
+
+        list_item = []
+        for (name, measurement_unit), amount in ingredients.items():
+            list_item.append(f"{name} — {amount} {measurement_unit}")
+        file_content = '\n'.join(list_item)
+
+        response = HttpResponse(file_content, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        return response
+
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        try:
+            recipe = self.get_object()
+        except Recipe.DoesNotExist:
+            return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_404_NOT_FOUND)
+
+        url = request.build_absolute_uri(
+            reverse('recipe-detail', kwargs={'pk': recipe.pk}))
+        return Response({'short-link': url})
+
 
 class CustomUserViewSet(UserViewSet):
+    def get_queryset(self):
+        return User.objects.all()
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -154,6 +202,23 @@ class CustomUserViewSet(UserViewSet):
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=False, methods=['get'], url_path='subscriptions', permission_classes=[permissions.IsAuthenticated])
+    def subscriptions(self, request):
+        user = request.user
+        followed_users = User.objects.filter(
+            following__user=user
+        )
+
+        # Пагинация
+        paginator = LimitOffsetPagination()
+        paginated_users = paginator.paginate_queryset(
+            followed_users, request, view=self)
+
+        # Сериализация
+        serializer = CustomUserSerializer(
+            paginated_users, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+
     @action(detail=False, methods=['post'])
     def set_password(self, request):
         serializer = SetPasswordSerializer(
@@ -165,11 +230,11 @@ class CustomUserViewSet(UserViewSet):
         return Response('Пароль изменен.', status=status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
-        if self.action == 'retrieve':
+        if self.action in ('retrieve', 'list'):
             return [permissions.AllowAny()]
         return super().get_permissions()
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
+        if self.action in ('retrieve', 'list'):
             return ShortUserSerializer
-        return super().get_permissions()
+        return super().get_serializer_class()

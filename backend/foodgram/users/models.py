@@ -16,6 +16,9 @@ class FoodgramUser(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'password']
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return self.email
 
