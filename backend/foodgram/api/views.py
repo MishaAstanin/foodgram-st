@@ -16,14 +16,19 @@ from recipes.models import Ingredient, Recipe, Featured, ShoppingList, RecipeIng
 from users.models import Follow
 from .serializers import IngredientSerializer, RecipeSerializer, CustomUserSerializer, RecipeOutputSerializer, ShortRecipeOutputSerializer, ShortUserSerializer, VeryShortUserSerializer
 from .permissions import AuthorOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
 
 User = get_user_model()
+
+
+class IngredientSearchFilter(filters.SearchFilter):
+    search_param = 'name'
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (IngredientSearchFilter,)
     search_fields = ('^name',)
     permission_classes = (permissions.AllowAny,)
     pagination_class = None
@@ -32,6 +37,27 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (AuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('author',)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        is_favorited = self.request.query_params.get('is_favorited')
+        if is_favorited is not None and user.is_authenticated:
+            if is_favorited == '1':
+                queryset = queryset.filter(in_featured__user=user)
+            elif is_favorited == '0':
+                queryset = queryset.exclude(in_featured__user=user)
+
+        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+        if is_in_shopping_cart is not None and user.is_authenticated:
+            if is_in_shopping_cart == '1':
+                queryset = queryset.filter(in_shopping_list__user=user)
+            elif is_in_shopping_cart == '0':
+                queryset = queryset.exclude(in_shopping_list__user=user)
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):

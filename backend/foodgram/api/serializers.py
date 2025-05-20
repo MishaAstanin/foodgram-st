@@ -38,13 +38,23 @@ class ShortRecipeOutputSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(UserSerializer):
     avatar = Base64ImageField(required=False)
     is_subscribed = serializers.SerializerMethodField()
-    recipes = ShortRecipeOutputSerializer(read_only=True, many=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = FoodgramUser
         fields = ('email', 'id', 'username',
                   'first_name', 'last_name', 'is_subscribed', 'recipes', 'recipes_count', 'avatar')
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        queryset = Recipe.objects.filter(author=obj)
+        recipes_limit = request.query_params.get('recipes_limit')
+        if recipes_limit is not None and recipes_limit.isdigit():
+            queryset = queryset[:int(recipes_limit)]
+        serializer = ShortRecipeOutputSerializer(
+            queryset, many=True, context={'request': request})
+        return serializer.data
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -136,6 +146,15 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'name', 'text', 'cooking_time')
         read_only_fields = ('author',)
 
+    def validate_ingredients(self, value):
+        if not value:
+            raise serializers.ValidationError("Обязательное поле.")
+        ingredients_id = [ingredient.get('id') for ingredient in value]
+        if len(ingredients_id) != len(set(ingredients_id)):
+            raise serializers.ValidationError(
+                "Ингредиенты не должны повторяться.")
+        return value
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
 
@@ -153,7 +172,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('ingredients', None)
+        if ingredients == None:
+            raise serializers.ValidationError(
+                "ingredients - обязательное поле.")
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
