@@ -153,8 +153,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         except Recipe.DoesNotExist:
             return Response({'detail': 'Страница не найдена.'}, status=status.HTTP_404_NOT_FOUND)
 
-        url = request.build_absolute_uri(
-            reverse('recipe-detail', kwargs={'pk': recipe.pk}))
+        domain = request.get_host()
+        scheme = 'https' if request.is_secure() else 'http'
+        path = f'/recipes/{recipe.pk}'
+        url = f'{scheme}://{domain}{path}'
         return Response({'short-link': url})
 
 

@@ -16,7 +16,7 @@ services:
     build: ../backend/
     env_file: .env
     volumes:
-      - static:/static
+      - static:/backend_static
       - media:/media
     depends_on:
       - db
