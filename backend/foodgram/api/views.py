@@ -11,7 +11,7 @@ from djoser.views import UserViewSet
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.response import Response
 
 from recipes.models import Featured, Ingredient, Recipe, RecipeIngredient, ShoppingList
@@ -50,6 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("author",)
+    pagination_class = PageNumberPagination
 
     def handle_post_delete(self, request, pk, model, error_msg_exists):
         user = request.user
