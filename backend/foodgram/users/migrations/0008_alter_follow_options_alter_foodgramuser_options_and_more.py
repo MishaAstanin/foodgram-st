@@ -6,28 +6,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0007_alter_foodgramuser_options'),
+        ("users", "0007_alter_foodgramuser_options"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='follow',
-            options={'verbose_name': 'подписка', 'verbose_name_plural': 'Подписки'},
+            name="follow",
+            options={"verbose_name": "подписка", "verbose_name_plural": "Подписки"},
         ),
         migrations.AlterModelOptions(
-            name='foodgramuser',
-            options={'ordering': ['id'], 'verbose_name': 'пользователь', 'verbose_name_plural': 'Пользователи'},
+            name="foodgramuser",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "пользователь",
+                "verbose_name_plural": "Пользователи",
+            },
         ),
         migrations.AlterField(
-            model_name='follow',
-            name='following',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='following', to=settings.AUTH_USER_MODEL, verbose_name='Автор'),
+            model_name="follow",
+            name="following",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="following",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Автор",
+            ),
         ),
         migrations.AlterField(
-            model_name='follow',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follower', to=settings.AUTH_USER_MODEL, verbose_name='Подписчик'),
+            model_name="follow",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="follower",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Подписчик",
+            ),
         ),
     ]

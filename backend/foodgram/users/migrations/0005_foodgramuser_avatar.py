@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0004_alter_foodgramuser_username'),
+        ("users", "0004_alter_foodgramuser_username"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='foodgramuser',
-            name='avatar',
-            field=models.ImageField(blank=True, null=True, upload_to='users_images', verbose_name='Аватар'),
+            model_name="foodgramuser",
+            name="avatar",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="users_images", verbose_name="Аватар"
+            ),
         ),
     ]

@@ -6,50 +6,100 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Ingredient',
+            name="Ingredient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128, verbose_name='Название')),
-                ('unit_measurement', models.CharField(max_length=64, verbose_name='Единица измерения')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=128, verbose_name="Название")),
+                (
+                    "unit_measurement",
+                    models.CharField(max_length=64, verbose_name="Единица измерения"),
+                ),
             ],
             options={
-                'verbose_name': 'ингредиент',
-                'verbose_name_plural': 'Ингредиенты',
+                "verbose_name": "ингредиент",
+                "verbose_name_plural": "Ингредиенты",
             },
         ),
         migrations.CreateModel(
-            name='Recipe',
+            name="Recipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=256, verbose_name='Название')),
-                ('image', models.ImageField(upload_to='recipes_images', verbose_name='Изображение')),
-                ('text', models.TextField(verbose_name='Текстовое описание')),
-                ('cooking_time', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Время приготовления (в минутах)')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=256, verbose_name="Название")),
+                (
+                    "image",
+                    models.ImageField(
+                        upload_to="recipes_images", verbose_name="Изображение"
+                    ),
+                ),
+                ("text", models.TextField(verbose_name="Текстовое описание")),
+                (
+                    "cooking_time",
+                    models.IntegerField(
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name="Время приготовления (в минутах)",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'рецепт',
-                'verbose_name_plural': 'Рецепты',
+                "verbose_name": "рецепт",
+                "verbose_name_plural": "Рецепты",
             },
         ),
         migrations.CreateModel(
-            name='RecipeIngredient',
+            name="RecipeIngredient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.IntegerField(verbose_name='Количество')),
-                ('ingredient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.ingredient', verbose_name='Ингредиент')),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.recipe', verbose_name='Рецепт')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.IntegerField(verbose_name="Количество")),
+                (
+                    "ingredient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="recipes.ingredient",
+                        verbose_name="Ингредиент",
+                    ),
+                ),
+                (
+                    "recipe",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="recipes.recipe",
+                        verbose_name="Рецепт",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'количество',
-                'verbose_name_plural': 'Количество',
+                "verbose_name": "количество",
+                "verbose_name_plural": "Количество",
             },
         ),
     ]

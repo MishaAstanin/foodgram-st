@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recipes', '0006_alter_recipeingredient_amount'),
+        ("recipes", "0006_alter_recipeingredient_amount"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='recipeingredient',
-            name='amount',
-            field=models.IntegerField(verbose_name='Количество'),
+            model_name="recipeingredient",
+            name="amount",
+            field=models.IntegerField(verbose_name="Количество"),
         ),
     ]

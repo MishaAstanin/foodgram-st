@@ -5,15 +5,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recipes', '0005_featured_shoppinglist'),
+        ("recipes", "0005_featured_shoppinglist"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='recipeingredient',
-            name='amount',
-            field=models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество'),
+            model_name="recipeingredient",
+            name="amount",
+            field=models.IntegerField(
+                validators=[django.core.validators.MinValueValidator(1)],
+                verbose_name="Количество",
+            ),
         ),
     ]

@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0006_follow'),
+        ("users", "0006_follow"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='foodgramuser',
-            options={'ordering': ['id']},
+            name="foodgramuser",
+            options={"ordering": ["id"]},
         ),
     ]

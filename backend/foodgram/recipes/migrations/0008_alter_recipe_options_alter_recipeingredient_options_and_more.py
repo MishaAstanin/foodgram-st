@@ -4,22 +4,31 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recipes', '0007_alter_recipeingredient_amount'),
+        ("recipes", "0007_alter_recipeingredient_amount"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='recipe',
-            options={'ordering': ('-pub_date',), 'verbose_name': 'рецепт', 'verbose_name_plural': 'Рецепты'},
+            name="recipe",
+            options={
+                "ordering": ("-pub_date",),
+                "verbose_name": "рецепт",
+                "verbose_name_plural": "Рецепты",
+            },
         ),
         migrations.AlterModelOptions(
-            name='recipeingredient',
-            options={'verbose_name': 'связь рецепта и ингредиента', 'verbose_name_plural': 'Связи рецепта и ингредиента'},
+            name="recipeingredient",
+            options={
+                "verbose_name": "связь рецепта и ингредиента",
+                "verbose_name_plural": "Связи рецепта и ингредиента",
+            },
         ),
         migrations.AlterModelOptions(
-            name='shoppinglist',
-            options={'verbose_name': 'список покупок', 'verbose_name_plural': 'Списки покупок'},
+            name="shoppinglist",
+            options={
+                "verbose_name": "список покупок",
+                "verbose_name_plural": "Списки покупок",
+            },
         ),
     ]

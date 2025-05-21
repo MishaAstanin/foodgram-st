@@ -5,30 +5,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0008_alter_follow_options_alter_foodgramuser_options_and_more'),
+        ("users", "0008_alter_follow_options_alter_foodgramuser_options_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='foodgramuser',
-            name='email',
-            field=models.EmailField(help_text='Уникальный адрес, не более 254 символов', max_length=254, unique=True, verbose_name='Адрес электронной почты'),
+            model_name="foodgramuser",
+            name="email",
+            field=models.EmailField(
+                help_text="Уникальный адрес, не более 254 символов",
+                max_length=254,
+                unique=True,
+                verbose_name="Адрес электронной почты",
+            ),
         ),
         migrations.AlterField(
-            model_name='foodgramuser',
-            name='first_name',
-            field=models.CharField(help_text='Имя, не более 150 символов', max_length=150, verbose_name='Имя'),
+            model_name="foodgramuser",
+            name="first_name",
+            field=models.CharField(
+                help_text="Имя, не более 150 символов",
+                max_length=150,
+                verbose_name="Имя",
+            ),
         ),
         migrations.AlterField(
-            model_name='foodgramuser',
-            name='last_name',
-            field=models.CharField(help_text='Фамилия, не более 150 символов', max_length=150, verbose_name='Фамилия'),
+            model_name="foodgramuser",
+            name="last_name",
+            field=models.CharField(
+                help_text="Фамилия, не более 150 символов",
+                max_length=150,
+                verbose_name="Фамилия",
+            ),
         ),
         migrations.AlterField(
-            model_name='foodgramuser',
-            name='username',
-            field=models.CharField(help_text='Уникальное имя, не более 150 символов', max_length=150, unique=True, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+\\Z')], verbose_name='Имя пользователя'),
+            model_name="foodgramuser",
+            name="username",
+            field=models.CharField(
+                help_text="Уникальное имя, не более 150 символов",
+                max_length=150,
+                unique=True,
+                validators=[django.core.validators.RegexValidator("^[\\w.@+-]+\\Z")],
+                verbose_name="Имя пользователя",
+            ),
         ),
     ]

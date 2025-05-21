@@ -5,15 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0003_alter_foodgramuser_email_and_more'),
+        ("users", "0003_alter_foodgramuser_email_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='foodgramuser',
-            name='username',
-            field=models.CharField(max_length=150, unique=True, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+\\Z')], verbose_name='Имя пользователя'),
+            model_name="foodgramuser",
+            name="username",
+            field=models.CharField(
+                max_length=150,
+                unique=True,
+                validators=[django.core.validators.RegexValidator("^[\\w.@+-]+\\Z")],
+                verbose_name="Имя пользователя",
+            ),
         ),
     ]
