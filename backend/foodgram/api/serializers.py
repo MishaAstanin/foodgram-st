@@ -7,8 +7,10 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Featured, ShoppingList
-from users.models import Follow
 
+
+MIN_NUMBER = 1
+MAX_NUMBER = 32000
 
 User = get_user_model()
 
@@ -32,7 +34,8 @@ class ShortRecipeOutputSerializer(serializers.ModelSerializer):
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = ("id", "first_name", "last_name", "username", "email", "password")
+        fields = ("id", "first_name", "last_name",
+                  "username", "email", "password")
 
 
 class BaseUserSerializer(UserSerializer):
@@ -45,9 +48,9 @@ class IsSubscribed(serializers.Serializer):
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, obj):
-        user = self.context.get("request").user
+        user = self.context["request"].user
         if user.is_authenticated:
-            return Follow.objects.filter(user=user, following=obj).exists()
+            return user.follower.filter(following=obj).exists()
         return False
 
 
@@ -109,13 +112,17 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientInputSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField(min_value=1)
+    amount = serializers.IntegerField(
+        min_value=MIN_NUMBER,
+        max_value=MAX_NUMBER,
+    )
 
 
 class IngredientOutputSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit")
 
     class Meta:
         model = RecipeIngredient
@@ -123,7 +130,8 @@ class IngredientOutputSerializer(serializers.ModelSerializer):
 
 
 class RecipeOutputSerializer(serializers.ModelSerializer):
-    ingredients = IngredientOutputSerializer(source="recipeingredient_set", many=True)
+    ingredients = IngredientOutputSerializer(
+        source="recipeingredient_set", many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     author = ShortUserSerializer()
@@ -149,17 +157,21 @@ class RecipeOutputSerializer(serializers.ModelSerializer):
         return model.objects.filter(user=user, recipe=recipe).exists()
 
     def get_is_favorited(self, obj):
-        user = self.context.get("request").user
+        user = self.context["request"].user
         return self.item_is_in_queryset(user, Featured, obj)
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context.get("request").user
+        user = self.context["request"].user
         return self.item_is_in_queryset(user, ShoppingList, obj)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientInputSerializer(many=True, write_only=True)
     image = Base64ImageField(required=True)
+    cooking_time = serializers.IntegerField(
+        min_value=MIN_NUMBER,
+        max_value=MAX_NUMBER,
+    )
 
     class Meta:
         model = Recipe
@@ -188,7 +200,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Обязательное поле.")
         ingredients_id = {ingredient.get("id") for ingredient in value}
         if len(ingredients_id) != len(value):
-            raise serializers.ValidationError("Ингредиенты не должны повторяться.")
+            raise serializers.ValidationError(
+                "Ингредиенты не должны повторяться.")
         return value
 
     def create(self, validated_data):
@@ -200,9 +213,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop("ingredients", None)
         if ingredients is None:
-            raise serializers.ValidationError("ingredients - обязательное поле.")
+            raise serializers.ValidationError(
+                "ingredients - обязательное поле.")
 
-        RecipeIngredient.objects.filter(recipe=instance).delete()
+        instance.recipe_ingredients.all().delete()
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

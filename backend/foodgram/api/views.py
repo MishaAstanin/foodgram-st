@@ -93,7 +93,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             elif is_favorited == "0":
                 queryset = queryset.exclude(in_featured__user=user)
 
-        is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
+        is_in_shopping_cart = self.request.query_params.get(
+            "is_in_shopping_cart")
         if is_in_shopping_cart is not None and user.is_authenticated:
             if is_in_shopping_cart == "1":
                 queryset = queryset.filter(in_shopping_list__user=user)
@@ -136,7 +137,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipes = Recipe.objects.filter(in_shopping_list__user=user)
 
         ingredients = {}
-        recipe_ingredients = RecipeIngredient.objects.filter(recipe__in=recipes)
+        recipe_ingredients = RecipeIngredient.objects.filter(
+            recipe__in=recipes)
         for item in recipe_ingredients:
             name = item.ingredient.name
             measurement_unit = item.ingredient.measurement_unit
@@ -183,7 +185,8 @@ class CustomUserViewSet(UserViewSet):
 
     @action(detail=False, methods=["get"])
     def me(self, request):
-        serializer = ShortUserSerializer(request.user, context={"request": request})
+        serializer = ShortUserSerializer(
+            request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["put", "delete"], url_path="me/avatar")
@@ -195,7 +198,8 @@ class CustomUserViewSet(UserViewSet):
             try:
                 format, imgstr = data.split(";base64,")
                 ext = format.split("/")[-1]
-                data = ContentFile(base64.b64decode(imgstr), name="temp." + ext)
+                data = ContentFile(base64.b64decode(
+                    imgstr), name="temp." + ext)
             except (ValueError, AttributeError):
                 return Response(
                     {"detail": "Invalid avatar"}, status=status.HTTP_400_BAD_REQUEST
@@ -227,17 +231,18 @@ class CustomUserViewSet(UserViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            if Follow.objects.filter(user=user, following=following).exists():
+            if user.follower.filter(following=following).exists():
                 return Response(
                     {"detail": "Повторная подписка невозможна."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             follow = Follow.objects.create(user=user, following=following)
-            serializer = CustomUserSerializer(following, context={"request": request})
+            serializer = CustomUserSerializer(
+                following, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == "DELETE":
-            follow = Follow.objects.filter(user=user, following=following).first()
+            follow = user.follower.filter(following=following).first()
             if not follow:
                 return Response(
                     {"detail": "Страница не найдена."},

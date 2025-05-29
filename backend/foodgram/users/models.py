@@ -60,6 +60,7 @@ class Follow(models.Model):
     class Meta:
         verbose_name = "подписка"
         verbose_name_plural = "Подписки"
+        ordering = ["id"]
 
     def __str__(self):
         return f"{self.user.get_username()} - {self.following.get_username()}"
