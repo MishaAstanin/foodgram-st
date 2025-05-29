@@ -7,7 +7,6 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Featured, ShoppingList
-from users.models import Follow
 
 
 MIN_NUMBER = 1
@@ -35,8 +34,7 @@ class ShortRecipeOutputSerializer(serializers.ModelSerializer):
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = ("id", "first_name", "last_name",
-                  "username", "email", "password")
+        fields = ("id", "first_name", "last_name", "username", "email", "password")
 
 
 class BaseUserSerializer(UserSerializer):
@@ -60,11 +58,10 @@ class FollowSerializer(serializers.Serializer):
     following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     def validate(self, attrs):
-        user = attrs['user']
-        following = attrs['following']
+        user = attrs["user"]
+        following = attrs["following"]
         if user == following:
-            raise serializers.ValidationError(
-                "Нельзя подписаться на самого себя.")
+            raise serializers.ValidationError("Нельзя подписаться на самого себя.")
         if user.follower.filter(following=following).exists():
             raise serializers.ValidationError("Повторная подписка невозможна.")
         return attrs
@@ -137,8 +134,7 @@ class IngredientInputSerializer(serializers.Serializer):
 class IngredientOutputSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(
-        source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
 
     class Meta:
         model = RecipeIngredient
@@ -146,8 +142,7 @@ class IngredientOutputSerializer(serializers.ModelSerializer):
 
 
 class RecipeOutputSerializer(serializers.ModelSerializer):
-    ingredients = IngredientOutputSerializer(
-        source="recipe_ingredients", many=True)
+    ingredients = IngredientOutputSerializer(source="recipe_ingredients", many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     author = ShortUserSerializer()
@@ -216,8 +211,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Обязательное поле.")
         ingredients_id = {ingredient.get("id") for ingredient in value}
         if len(ingredients_id) != len(value):
-            raise serializers.ValidationError(
-                "Ингредиенты не должны повторяться.")
+            raise serializers.ValidationError("Ингредиенты не должны повторяться.")
         return value
 
     def create(self, validated_data):
@@ -229,8 +223,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop("ingredients", None)
         if ingredients is None:
-            raise serializers.ValidationError(
-                "ingredients - обязательное поле.")
+            raise serializers.ValidationError("ingredients - обязательное поле.")
 
         instance.recipe_ingredients.all().delete()
 

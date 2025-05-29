@@ -6,41 +6,74 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recipes', '0009_alter_recipe_cooking_time_alter_recipe_name'),
+        ("recipes", "0009_alter_recipe_cooking_time_alter_recipe_name"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='featured',
-            options={'ordering': ['id'], 'verbose_name': 'избранное', 'verbose_name_plural': 'Избранное'},
+            name="featured",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "избранное",
+                "verbose_name_plural": "Избранное",
+            },
         ),
         migrations.AlterModelOptions(
-            name='ingredient',
-            options={'ordering': ['id'], 'verbose_name': 'ингредиент', 'verbose_name_plural': 'Ингредиенты'},
+            name="ingredient",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "ингредиент",
+                "verbose_name_plural": "Ингредиенты",
+            },
         ),
         migrations.AlterModelOptions(
-            name='recipeingredient',
-            options={'ordering': ['id'], 'verbose_name': 'связь рецепта и ингредиента', 'verbose_name_plural': 'Связи рецепта и ингредиента'},
+            name="recipeingredient",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "связь рецепта и ингредиента",
+                "verbose_name_plural": "Связи рецепта и ингредиента",
+            },
         ),
         migrations.AlterModelOptions(
-            name='shoppinglist',
-            options={'ordering': ['id'], 'verbose_name': 'список покупок', 'verbose_name_plural': 'Списки покупок'},
+            name="shoppinglist",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "список покупок",
+                "verbose_name_plural": "Списки покупок",
+            },
         ),
         migrations.AlterField(
-            model_name='recipe',
-            name='cooking_time',
-            field=models.PositiveSmallIntegerField(help_text='Время приготовления (в минутах), не менее {MIN_NUMBER}', validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(32000)], verbose_name='Время приготовления (в минутах)'),
+            model_name="recipe",
+            name="cooking_time",
+            field=models.PositiveSmallIntegerField(
+                help_text="Время приготовления (в минутах), не менее {MIN_NUMBER}",
+                validators=[
+                    django.core.validators.MinValueValidator(1),
+                    django.core.validators.MaxValueValidator(32000),
+                ],
+                verbose_name="Время приготовления (в минутах)",
+            ),
         ),
         migrations.AlterField(
-            model_name='recipeingredient',
-            name='amount',
-            field=models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(32000)], verbose_name='Количество'),
+            model_name="recipeingredient",
+            name="amount",
+            field=models.PositiveSmallIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(1),
+                    django.core.validators.MaxValueValidator(32000),
+                ],
+                verbose_name="Количество",
+            ),
         ),
         migrations.AlterField(
-            model_name='recipeingredient',
-            name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.recipe', verbose_name='Рецепт'),
+            model_name="recipeingredient",
+            name="recipe",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipe_ingredients",
+                to="recipes.recipe",
+                verbose_name="Рецепт",
+            ),
         ),
     ]

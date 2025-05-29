@@ -4,14 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0009_alter_foodgramuser_email_and_more'),
+        ("users", "0009_alter_foodgramuser_email_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='follow',
-            options={'ordering': ['id'], 'verbose_name': 'подписка', 'verbose_name_plural': 'Подписки'},
+            name="follow",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "подписка",
+                "verbose_name_plural": "Подписки",
+            },
         ),
     ]

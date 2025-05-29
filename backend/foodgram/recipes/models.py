@@ -13,8 +13,7 @@ class Ingredient(models.Model):
     """Ингредиент."""
 
     name = models.CharField(max_length=128, verbose_name="Название")
-    measurement_unit = models.CharField(
-        max_length=64, verbose_name="Единица измерения")
+    measurement_unit = models.CharField(max_length=64, verbose_name="Единица измерения")
 
     class Meta:
         verbose_name = "ингредиент"
@@ -39,18 +38,14 @@ class Recipe(models.Model):
         verbose_name="Название",
         help_text="Название, не более 256 символов",
     )
-    image = models.ImageField(
-        upload_to="recipes_images", verbose_name="Изображение")
+    image = models.ImageField(upload_to="recipes_images", verbose_name="Изображение")
     text = models.TextField(verbose_name="Текстовое описание")
     ingredients = models.ManyToManyField(
         Ingredient, through="RecipeIngredient", verbose_name="Ингредиенты"
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name="Время приготовления (в минутах)",
-        validators=[
-            MinValueValidator(MIN_NUMBER),
-            MaxValueValidator(MAX_NUMBER)
-        ],
+        validators=[MinValueValidator(MIN_NUMBER), MaxValueValidator(MAX_NUMBER)],
         help_text="Время приготовления (в минутах), не менее {MIN_NUMBER}",
     )
     pub_date = models.DateTimeField(
@@ -70,7 +65,9 @@ class RecipeIngredient(models.Model):
     """Связь рецепта и ингредиента."""
 
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, verbose_name="Рецепт",
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name="Рецепт",
         related_name="recipe_ingredients",
     )
     ingredient = models.ForeignKey(
@@ -78,10 +75,7 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name="Количество",
-        validators=[
-            MinValueValidator(MIN_NUMBER),
-            MaxValueValidator(MAX_NUMBER)
-        ],
+        validators=[MinValueValidator(MIN_NUMBER), MaxValueValidator(MAX_NUMBER)],
     )
 
     class Meta:

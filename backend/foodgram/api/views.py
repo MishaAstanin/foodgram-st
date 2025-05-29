@@ -11,7 +11,7 @@ from djoser.views import UserViewSet
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from recipes.models import Featured, Ingredient, Recipe, RecipeIngredient, ShoppingList
@@ -26,7 +26,7 @@ from .serializers import (
     RecipeOutputSerializer,
     RecipeSerializer,
     ShortRecipeOutputSerializer,
-    FollowSerializer
+    FollowSerializer,
 )
 
 
@@ -94,8 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             elif is_favorited == "0":
                 queryset = queryset.exclude(in_featured__user=user)
 
-        is_in_shopping_cart = self.request.query_params.get(
-            "is_in_shopping_cart")
+        is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
         if is_in_shopping_cart is not None and user.is_authenticated:
             if is_in_shopping_cart == "1":
                 queryset = queryset.filter(in_shopping_list__user=user)
@@ -138,8 +137,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipes = Recipe.objects.filter(in_shopping_list__user=user)
 
         ingredients = {}
-        recipe_ingredients = RecipeIngredient.objects.filter(
-            recipe__in=recipes)
+        recipe_ingredients = RecipeIngredient.objects.filter(recipe__in=recipes)
         for item in recipe_ingredients:
             name = item.ingredient.name
             measurement_unit = item.ingredient.measurement_unit
@@ -186,8 +184,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(detail=False, methods=["get"])
     def me(self, request):
-        serializer = ShortUserSerializer(
-            request.user, context={"request": request})
+        serializer = ShortUserSerializer(request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["put", "delete"], url_path="me/avatar")
@@ -199,8 +196,7 @@ class CustomUserViewSet(UserViewSet):
             try:
                 format, imgstr = data.split(";base64,")
                 ext = format.split("/")[-1]
-                data = ContentFile(base64.b64decode(
-                    imgstr), name="temp." + ext)
+                data = ContentFile(base64.b64decode(imgstr), name="temp." + ext)
             except (ValueError, AttributeError):
                 return Response(
                     {"detail": "Invalid avatar"}, status=status.HTTP_400_BAD_REQUEST
@@ -232,7 +228,8 @@ class CustomUserViewSet(UserViewSet):
             if serializer.is_valid():
                 follow = Follow.objects.create(user=user, following=following)
                 user_serializer = CustomUserSerializer(
-                    following, context={"request": request})
+                    following, context={"request": request}
+                )
                 return Response(user_serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
