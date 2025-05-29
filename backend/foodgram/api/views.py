@@ -26,6 +26,7 @@ from .serializers import (
     RecipeOutputSerializer,
     RecipeSerializer,
     ShortRecipeOutputSerializer,
+    FollowSerializer
 )
 
 
@@ -50,7 +51,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("author",)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
 
     def handle_post_delete(self, request, pk, model, error_msg_exists):
         user = request.user
@@ -225,21 +226,16 @@ class CustomUserViewSet(UserViewSet):
             )
 
         if request.method == "POST":
-            if user == following:
-                return Response(
-                    {"detail": "Нельзя подписаться на самого себя."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if user.follower.filter(following=following).exists():
-                return Response(
-                    {"detail": "Повторная подписка невозможна."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            follow = Follow.objects.create(user=user, following=following)
-            serializer = CustomUserSerializer(
-                following, context={"request": request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = FollowSerializer(
+                data={"user": user.id, "following": following.id}
+            )
+            if serializer.is_valid():
+                follow = Follow.objects.create(user=user, following=following)
+                user_serializer = CustomUserSerializer(
+                    following, context={"request": request})
+                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == "DELETE":
             follow = user.follower.filter(following=following).first()

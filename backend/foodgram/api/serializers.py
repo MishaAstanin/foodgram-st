@@ -7,6 +7,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Featured, ShoppingList
+from users.models import Follow
 
 
 MIN_NUMBER = 1
@@ -54,6 +55,21 @@ class IsSubscribed(serializers.Serializer):
         return False
 
 
+class FollowSerializer(serializers.Serializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    def validate(self, attrs):
+        user = attrs['user']
+        following = attrs['following']
+        if user == following:
+            raise serializers.ValidationError(
+                "Нельзя подписаться на самого себя.")
+        if user.follower.filter(following=following).exists():
+            raise serializers.ValidationError("Повторная подписка невозможна.")
+        return attrs
+
+
 class CustomUserSerializer(UserSerializer, IsSubscribed):
     avatar = Base64ImageField(required=False)
     recipes = serializers.SerializerMethodField()
@@ -75,7 +91,7 @@ class CustomUserSerializer(UserSerializer, IsSubscribed):
 
     def get_recipes(self, obj):
         request = self.context.get("request")
-        queryset = Recipe.objects.filter(author=obj)
+        queryset = obj.recipes.all()
         recipes_limit = request.query_params.get("recipes_limit")
         if recipes_limit is not None and recipes_limit.isdigit():
             queryset = queryset[: int(recipes_limit)]
