@@ -131,7 +131,7 @@ class IngredientOutputSerializer(serializers.ModelSerializer):
 
 class RecipeOutputSerializer(serializers.ModelSerializer):
     ingredients = IngredientOutputSerializer(
-        source="recipeingredient_set", many=True)
+        source="recipe_ingredients", many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     author = ShortUserSerializer()
