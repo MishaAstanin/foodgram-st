@@ -16,6 +16,16 @@
 
 ---
 
+## Технологии
+
+- Python
+- Django, Django REST Framework
+- Djoser/JWT-token
+- SQLite/PostgreSQL
+- React
+  
+---
+
 ## Структура проекта
 
 - `infra/` — конфигурация инфраструктуры (nginx, docker-compose).
